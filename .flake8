@@ -1,0 +1,16 @@
+[flake8]
+ignore = E501,W503,E203,C901
+max-line-length = 80
+max-complexity = 20
+exclude =
+    node_modules,
+    .serverless,
+    .venv,
+    .terragrunt-cache,
+    .idea,
+    .vscode,
+    .dynamodb,
+    .pytest_cache,
+    .cursor,
+    __pycache__,
+    src/notebooks/.ipynb_checkpoints 
