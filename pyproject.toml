@@ -1,0 +1,32 @@
+[project]
+name = "sbert-serverless"
+version = "0.1.0"
+description = "Serverless implementation of sbert service for mentorpal"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "boto3>=1.38.41",
+	"python-dotenv>=1.1.0",
+	"requests>=2.32.4",
+	"tqdm>=4.67.1",
+	"dataclass-wizard>=0.35.1",
+	"pydantic>=2.12.3",
+	"jsonschema>=4.26.0",
+]
+
+[dependency-groups]
+dev = [
+	"pytest-asyncio",
+	"pytest>=8.0.0",
+	"black>=25.1.0",
+	"flake8>=7.3.0",
+	"coverage>=7.11.0",
+	"licenseheaders",
+	"mypy>=1.18.2",
+	"pytest-mock>=3.15.1",
+	"pytest-only>=2.1.2",
+	"setuptools>=81.0.0,<82.0.0",
+]
+
+[tool.uv.sources]
+licenseheaders = { git = "https://github.com/kycarr/licenseheaders.git" }

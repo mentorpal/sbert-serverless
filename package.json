@@ -1,0 +1,26 @@
+{
+  "name": "serverless-lambdas",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "offline": "serverless offline -s offline --disableCookieValidation",
+    "deploy": "serverless deploy",
+    "deploy:dev": "make build-requirements && sls deploy -s dev --region us-east-1",
+    "deploy:qa": "make build-requirements && sls deploy -s qa --region us-east-1",
+    "deploy:prod": "make build-requirements && sls deploy -s prod --region us-east-1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "serverless": "^4.17.0",
+    "serverless-offline": "^14.4.0",
+    "serverless-python-requirements": "^6.0.0"
+  },
+  "dependencies": {
+    "serverless-domain-manager": "^9.1.0",
+    "serverless-layers": "^2.8.5"
+  }
+}

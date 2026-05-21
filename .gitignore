@@ -1,0 +1,32 @@
+# Regular folders and files
+node_modules
+DynamoDBLocal.jar
+
+# Hidden files and folders (starting with .)
+.serverless
+.venv
+.terragrunt-cache
+.idea
+.vscode
+.cursor
+.dynamodb
+.env
+.env.json
+.pytest_cache
+**/.DS_Store
+.coverage
+
+# Python cache
+__pycache__
+src/notebooks/.ipynb_checkpoints
+
+# Configuration and secret files
+global_secrets.hcl
+ssm.json
+
+# RAG test examples (generated during testing)
+test/examples/rag/
+
+# Pipeline output files
+pipeline_output.txt
+/.python_packages
