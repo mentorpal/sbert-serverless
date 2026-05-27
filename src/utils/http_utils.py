@@ -9,7 +9,6 @@ import json
 import os
 import re
 from typing import Any
-from dataclasses import dataclass
 
 
 def append_secure_headers(headers: dict[str, str]):
