@@ -39,8 +39,7 @@ custom:
         compatibleRuntimes:
           - python3.12
         functions:
-            - autogen_request
-            - autogen_status
+            - ping
 
 provider:
   name: aws
@@ -52,41 +51,10 @@ provider:
     blockPublicAccess: true
     serverSideEncryption: AES256
     versioning: false
-  ecr:
-    images:
-      autogen:
-        path: ./
-        file: Dockerfile.autogen
-        platform: linux/amd64
-
   environment:
     NUMBA_CACHE_DIR: /tmp
     EASYOCR_MODULE_PATH: /tmp
     MODULE_PATH: /tmp
-  iam:
-    role:
-      statements:
-      # todo create dedicated roles for each function for increased security
-        - Effect: "Allow"
-          Action:
-            - dynamodb:GetItem
-            - dynamodb:PutItem
-            - dynamodb:UpdateItem
-          Resource:
-            Fn::GetAtt: [JobsTable, Arn]
-        - Effect: "Allow"
-          Action:
-            - sqs:SendMessage
-            - sqs:GetQueueUrl
-          Resource:
-            Fn::GetAtt: [ExecuteQueue, Arn]
-        - Effect: "Allow"
-          Action:
-            - s3:GetObject
-            - s3:PutObject
-            - s3:ListBucket
-          Resource:
-            - "arn:aws:s3:::*"
 package:
  patterns:
      - '!./node_modules'
@@ -96,42 +64,15 @@ package:
      - '!**/.mypy_cache/**'
 
 functions:
-  autogen_request:
-    handler: src/functions/request_autogen.handler
+  ping:
+    handler: src/functions/ping.handler
     timeout: 30
     memorySize: 1024
     events:
       - http:
-          path: /autogen
-          method: post
-          cors: true
-  autogen:
-    image:
-      name: autogen
-      command:
-        - src.functions.autogen.main_sync
-    memorySize: 8192
-    ephemeralStorage:
-    size: 10240
-    timeout: 600
-    events:
-      - sqs:
-          arn:
-            Fn::GetAtt: [ExecuteQueue, Arn]
-          batchSize: 1
-  autogen_status:
-    handler: src/functions/autogen_status.handler
-    memorySize: 512
-    timeout: 10
-    events:
-      - http:
-          path: /autogen/status/{id}
+          path: /ping
           method: get
           cors: true
-          request:
-            parameters:
-              paths:
-                id: true
 
 resources:
   Conditions:

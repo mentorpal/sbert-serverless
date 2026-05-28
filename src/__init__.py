@@ -4,9 +4,3 @@
 #
 # The full terms of this copyright and license should always be found in the root directory of this software deliverable as "license.txt" and if these terms are not found with this software, please contact the USC Stevens Center for the full license.
 #
-from src.utils.http_utils import create_json_response
-from typing import Dict, Any
-
-
-def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
-    return create_json_response(status=200, data={"body": "pong"}, event=event)
