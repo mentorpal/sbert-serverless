@@ -13,7 +13,7 @@ custom:
     prod: api.mentorpal.org
   customDomain:
     domainName: ${self:custom.domain.${opt:stage, 'dev'}}
-    basePath: "sbert" # api root url becomes: api.pal3.org/llm-manager
+    basePath: "sbert" # api root url becomes: api.mentorpal.org/sbert
     stage: ${self:provider.stage}
     endpointType: regional
     apiType: rest

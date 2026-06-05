@@ -70,8 +70,7 @@ test-license: LICENSE LICENSE_HEADER
 	
 .PHONY: build-requirements
 build-requirements: $(VENV)
-	uv export --no-hashes --no-group dev > requirements-full.txt
-	uv export --no-hashes --only-group base > requirements.txt
+	uv export --no-hashes --no-group dev > requirements.txt
 
 .PHONY: build-requirements-azure
 build-requirements-azure: $(VENV)
