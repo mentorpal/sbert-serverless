@@ -30,3 +30,5 @@ test/examples/rag/
 # Pipeline output files
 pipeline_output.txt
 /.python_packages
+
+syn/
