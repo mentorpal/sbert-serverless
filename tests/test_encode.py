@@ -8,13 +8,13 @@ def test_cosine_sim():
         {"body": json.dumps({"a": [1, 2, 3], "b": [1, 2, 3]})}, None
     )
     assert response["statusCode"] == 200
-    assert json.loads(response["body"])["data"]["score"] == pytest.approx(1.0)
+    assert json.loads(response["body"])["data"]["score"] == [[1.0]]
 
     response = cos_sim_weight_handler(
         {"body": json.dumps({"a": [1, 2, 3], "b": [-1, -2, -3]})}, None
     )
     assert response["statusCode"] == 200
-    assert json.loads(response["body"])["data"]["score"] == pytest.approx(-1.0)
+    assert json.loads(response["body"])["data"]["score"] == [[-1.0]]
 
     response = cos_sim_weight_handler(
         {"body": json.dumps({"p": [1, 2, 3], "b": [-1, -2, -3]})}, None

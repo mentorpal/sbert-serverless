@@ -89,12 +89,12 @@ def cos_sim_weight_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any
     b = data["b"]
 
     try:
-        similarity = cos_sim_weight(a, b)
+        similarity_matrix = cos_sim_weight(a, b)
 
     except Exception as e:
         return {"statusCode": 400, "body": json.dumps({"error": f"{e}"})}
 
     # return {"statusCode":200, "body": json.dumps({"similarity":float(similarity)})}
     return create_json_response(
-        status=200, data={"score": float(similarity)}, event=event
+        status=200, data={"score": similarity_matrix.tolist()}, event=event
     )
