@@ -1,8 +1,8 @@
-import numpy as np
+
 import json, ollama, logging
 from typing import Dict, Any
 from src.utils.http_utils import create_json_response
-
+from src.utils.math import cos_sim_weight
 
 def _encode(sentence):
     return ollama.embeddings(model='mxbai-embed-large',prompt=sentence)['embedding']
@@ -46,41 +46,28 @@ def multiple_encode_handler(event, context):
 
     
 
-def _cos_sim_weight(a,b):
-    if not isinstance(a, np.ndarray):
-        a = np.array(a)
-    if not isinstance(b, np.ndarray):
-        b = np.array(b)
-
-    return np.dot(a,b)/(np.linalg.norm(a) * np.linalg.norm(b))
-
-
 def cos_sim_weight_handler(event: Dict[str, Any], context:Any) -> Dict[str, Any]:
     body = event.get('body')
 
     if body is None:
-        return {'statusCode': 400,
-                'body':json.dumps({"error": "Missing request body for POST method"})}
+        return  create_json_response(status=400, data={"error": "Missing request body for POST method"}, event=event)
+
     
     try:
         data= json.loads(body)
     except json.JSONDecodeError:
-        return {
-            'statusCode':400,
-            "body": json.dumps({"error": "Invalid JSON body"})
-        }
+        return  create_json_response(status=400, data={"error": "Invalid JSON body"}, event=event)
+
     
     if 'a' not in data or 'b' not in data:
-        return {
-            'statusCode':400,
-            "body": json.dumps({"error": "both a and b are required"})
-        }
+        return  create_json_response(status=400, data={"error": "Both a and b are required"}, event=event)
+
     
     a = data['a']
     b = data['b']
 
     try:
-        similarity = _cos_sim_weight(a,b)
+        similarity = cos_sim_weight(a,b)
 
     except Exception as e:
         return {
