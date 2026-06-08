@@ -1,9 +1,8 @@
-import requests
-import queue
-import torch
+import torch, json, queue, requests
 from typing import List
-from src.utils.encode import cos_sim_weight
+from src.utils.encode import cos_sim_weight, encode
 from torch import topk
+from src.utils.http_utils import create_json_response
 
 
 def paraphrase_mining(
@@ -37,11 +36,11 @@ def paraphrase_mining(
             "http://localhost:11434/api/embed",
             json={
                 "model": "mxbai-embed-large",
-                "input": sentences[i, batch_size],
+                "input": sentences[i : i + batch_size],
             },
         )
         data = response.json()["embeddings"]
-        embeddings.append(data)
+        embeddings.extend(data)
 
     top_k += 1  # A sentence has the highest similarity to itself. Increase +1 as we are interest in distinct pairs
 
@@ -99,3 +98,35 @@ def paraphrase_mining(
     # Highest scores first
     pairs_list = sorted(pairs_list, key=lambda x: x[0], reverse=True)
     return pairs_list
+
+
+def paraphrase_mining_handler(event, context):
+    body = event.get("body")
+    if not body:
+        return create_json_response(
+            status=400, data={"error": "missing body for POST method"}, event=event
+        )
+
+    try:
+        data = json.loads(body)
+    except:
+        return create_json_response(
+            status=400, data={"error": "invalid JSON body"}, event=event
+        )
+
+    if "sentence" not in data:
+        return create_json_response(
+            status=400, data={"error": "sentence not provided"}, event=event
+        )
+
+    if "topk" not in data:
+        return create_json_response(
+            status=400, data={"error": "topk not provided"}, event=event
+        )
+
+    sentences = data["sentence"]
+    result = paraphrase_mining(sentences=sentences, top_k=data["topk"])
+
+    return create_json_response(
+        status=200, data={"query": data["sentence"], "encoding": result}, event=event
+    )
