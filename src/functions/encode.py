@@ -16,7 +16,7 @@ def encode_handler(event, context):
 
     try:
         data = json.loads(body)
-    except:
+    except json.JSONDecodeError:
         return create_json_response(
             status=400, data={"error": "invalid JSON body"}, event=event
         )
@@ -43,7 +43,7 @@ def multiple_encode_handler(event, context):
 
     try:
         data = json.loads(body)
-    except:
+    except json.JSONDecodeError:
         return create_json_response(
             status=400, data={"error": "invalid JSON body"}, event=event
         )

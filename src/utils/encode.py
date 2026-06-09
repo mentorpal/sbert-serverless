@@ -1,5 +1,6 @@
 import numpy as np
-import ollama, requests
+import ollama
+import requests
 
 
 def cos_sim_weight(a, b):

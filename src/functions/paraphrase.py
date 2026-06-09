@@ -1,4 +1,6 @@
-import torch, json, queue
+import torch
+import json
+import queue
 from typing import List
 from src.utils.encode import cos_sim_weight, encode_batch
 from torch import topk
@@ -51,15 +53,15 @@ def paraphrase_mining(
                 ],
             )
 
-            scores_top_k_values, scores_top_k_idx = topk(
+            scores_top_k_values_tensor, scores_top_k_idx_tensor = topk(
                 torch.from_numpy(scores),
                 min(top_k, len(scores[0])),
                 dim=1,
                 largest=True,
                 sorted=False,
             )
-            scores_top_k_values = scores_top_k_values.cpu().tolist()
-            scores_top_k_idx = scores_top_k_idx.cpu().tolist()
+            scores_top_k_values = scores_top_k_values_tensor.cpu().tolist()
+            scores_top_k_idx = scores_top_k_idx_tensor.cpu().tolist()
 
             for query_itr in range(len(scores)):
                 for top_k_idx, corpus_itr in enumerate(scores_top_k_idx[query_itr]):
@@ -99,7 +101,7 @@ def paraphrase_mining_handler(event, context):
 
     try:
         data = json.loads(body)
-    except:
+    except json.JSONDecodeError:
         return create_json_response(
             status=400, data={"error": "invalid JSON body"}, event=event
         )
