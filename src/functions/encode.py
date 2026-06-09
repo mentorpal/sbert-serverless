@@ -1,7 +1,7 @@
 import json, logging
 from typing import Dict, Any
 from src.utils.http_utils import create_json_response
-from src.utils.encode import cos_sim_weight, encode
+from src.utils.encode import cos_sim_weight, encode, encode_batch
 
 
 def encode_handler(event, context):
@@ -48,13 +48,14 @@ def multiple_encode_handler(event, context):
             status=400, data={"error": "sentences not provided"}, event=event
         )
 
-    sentences = data["sentences"]
-    result = list(
-        map(
-            lambda sentence: {"original": sentence, "encoded": encode(sentence)},
-            sentences,
+    if "batch_size" not in data:
+        return create_json_response(
+            status=400, data={"error": "batch_size not provided"}, event=event
         )
-    )
+
+    sentences = data["sentences"]
+    result = encode_batch(sentences, batch_size=data["batch_size"])
+
     logging.info(
         f"Input length: {len(sentences)}, number of encoded result: {len(result)} "
     )

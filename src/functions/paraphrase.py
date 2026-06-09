@@ -1,6 +1,6 @@
-import torch, json, queue, requests
+import torch, json, queue
 from typing import List
-from src.utils.encode import cos_sim_weight, encode
+from src.utils.encode import cos_sim_weight, encode_batch
 from torch import topk
 from src.utils.http_utils import create_json_response
 
@@ -30,17 +30,7 @@ def paraphrase_mining(
 
     # Compute embedding for the sentences
 
-    embeddings = []
-    for i in range(0, len(sentences) - batch_size + 1, batch_size):
-        response = requests.post(
-            "http://localhost:11434/api/embed",
-            json={
-                "model": "mxbai-embed-large",
-                "input": sentences[i : i + batch_size],
-            },
-        )
-        data = response.json()["embeddings"]
-        embeddings.extend(data)
+    embeddings = encode_batch(sentences, batch_size=batch_size)
 
     top_k += 1  # A sentence has the highest similarity to itself. Increase +1 as we are interest in distinct pairs
 
