@@ -66,7 +66,7 @@ def paraphrase_mining(
                     i = query_start_idx + query_itr
                     j = corpus_start_idx + corpus_itr
 
-                    if i != j and scores_top_k_values[query_itr][top_k_idx] > min_score:
+                    if i < j and scores_top_k_values[query_itr][top_k_idx] > min_score:
                         pairs.put((scores_top_k_values[query_itr][top_k_idx], i, j))
                         num_added += 1
 
