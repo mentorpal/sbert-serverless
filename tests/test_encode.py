@@ -8,9 +8,8 @@
 from src.functions.encode import (
     encode_handler,
     cos_sim_weight_handler,
-    multiple_encode_handler,
 )
-from src.utils.encode import cos_sim_weight, encode, encode_batch
+from src.utils.encode import cos_sim_weight, encode
 
 
 import numpy as np
@@ -41,7 +40,7 @@ def test_cosine_sim():
 
 
 def test_encode():
-    response = encode_handler({"body": json.dumps({"sentence": "Hello world"})}, None)
+    response = encode_handler({"body": json.dumps({"sentences": "Hello world"})}, None)
 
     assert response["statusCode"] == 200
     assert json.loads(response["body"])["data"]["query"] == "Hello world"
@@ -57,12 +56,11 @@ def test_encode():
 
 
 def test_multiple_encode_handler():
-    response = multiple_encode_handler(
+    response = encode_handler(
         {
             "body": json.dumps(
                 {
                     "sentences": ["Hello world", "This is a test sentence"],
-                    "batch_size": 1,
                 }
             )
         },
@@ -78,10 +76,10 @@ def test_multiple_encode_handler():
         "This is a test sentence",
     ]
 
-    response = multiple_encode_handler({"body": None}, None)
+    response = encode_handler({"body": None}, None)
     assert response["statusCode"] == 400
 
-    response = multiple_encode_handler(
+    response = encode_handler(
         {"body": json.dumps({"not sentences": "Hello world"})}, None
     )
     assert response["statusCode"] == 400
@@ -93,7 +91,7 @@ def test_encode_and_cos_sim_weight():
     assert np.linalg.norm(cos_sim_weight(embedding1, embedding2)) >= 0.9
 
 
-def test_encode_batch():
+def test_encode_multiple():
     texts = [
         "Hello",
         "Hi",
@@ -199,18 +197,6 @@ def test_encode_batch():
         "We need a better fallback",
     ]
 
-    batch_size = 32
-    embeddings, size = encode_batch(
-        sentences=texts, batch_size=batch_size, for_testing=True
-    )
+    embeddings = encode(texts)
 
-    assert len(embeddings) == size
-    assert len(embeddings) == len(texts) // batch_size
-
-    batch_size = 1
-    embeddings, size = encode_batch(
-        sentences=texts, batch_size=batch_size, for_testing=True
-    )
-
-    assert len(embeddings) == size
-    assert len(embeddings) == len(texts) // batch_size
+    assert len(embeddings) == len(texts)

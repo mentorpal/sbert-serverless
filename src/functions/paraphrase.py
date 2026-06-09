@@ -9,15 +9,13 @@ import torch
 import json
 import queue
 from typing import List
-from src.utils.encode import cos_sim_weight, encode_batch
+from src.utils.encode import cos_sim_weight, encode
 from torch import topk
 from src.utils.http_utils import create_json_response
 
 
 def paraphrase_mining(
-    # self,
     sentences: List[str],
-    batch_size: int = 32,
     query_chunk_size: int = 5000,
     corpus_chunk_size: int = 100000,
     max_pairs: int = 500000,
@@ -29,7 +27,6 @@ def paraphrase_mining(
 
     :param model: SentenceTransformer model for embedding computation
     :param sentences: A list of strings (texts or sentences)
-    :param batch_size: Number of texts that are encoded simultaneously by the model
     :param query_chunk_size: Search for most similar pairs for #query_chunk_size at the same time. Decrease, to lower memory footprint (increases run-time).
     :param corpus_chunk_size: Compare a sentence simultaneously against #corpus_chunk_size other sentences. Decrease, to lower memory footprint (increases run-time).
     :param max_pairs: Maximal number of text pairs returned.
@@ -39,7 +36,7 @@ def paraphrase_mining(
 
     # Compute embedding for the sentences
 
-    embeddings = encode_batch(sentences, batch_size=batch_size)
+    embeddings = encode(sentences)
 
     top_k += 1  # A sentence has the highest similarity to itself. Increase +1 as we are interest in distinct pairs
 

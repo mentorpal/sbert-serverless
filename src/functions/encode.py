@@ -8,7 +8,7 @@
 import json
 from typing import Dict, Any
 from src.utils.http_utils import create_json_response
-from src.utils.encode import cos_sim_weight, encode, encode_batch
+from src.utils.encode import cos_sim_weight, encode
 from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -28,52 +28,12 @@ def encode_handler(event, context):
             status=400, data={"error": "invalid JSON body"}, event=event
         )
 
-    if "sentence" not in data:
+    if "sentences" not in data:
         return create_json_response(
             status=400, data={"error": "sentence not provided"}, event=event
         )
 
-    result = encode(data["sentence"])
-    return create_json_response(
-        status=200, data={"query": data["sentence"], "encoding": result}, event=event
-    )
-
-
-def multiple_encode_handler(event, context):
-    logger.info("starting encode batch")
-
-    body = event.get("body")
-    if not body:
-        return create_json_response(
-            status=400, data={"error": "missing body for POST method"}, event=event
-        )
-
-    try:
-        data = json.loads(body)
-    except json.JSONDecodeError:
-        return create_json_response(
-            status=400, data={"error": "invalid JSON body"}, event=event
-        )
-
-    if "sentences" not in data:
-        return create_json_response(
-            status=400, data={"error": "sentences not provided"}, event=event
-        )
-
-    if "batch_size" not in data:
-        return create_json_response(
-            status=400, data={"error": "batch_size not provided"}, event=event
-        )
-
-    sentences = data["sentences"]
-    batch_size = data["batch_size"]
-    result = encode_batch(sentences, batch_size=batch_size)
-
-    logger.debug("batch size=%s", batch_size)
-
-    logger.info(
-        f"Input length: {len(sentences)}, number of encoded result: {len(result)} "
-    )
+    result = encode(data["sentences"])
     return create_json_response(
         status=200, data={"query": data["sentences"], "encoding": result}, event=event
     )
