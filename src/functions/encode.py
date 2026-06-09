@@ -1,7 +1,10 @@
-import json, logging
+import json
 from typing import Dict, Any
 from src.utils.http_utils import create_json_response
 from src.utils.encode import cos_sim_weight, encode, encode_batch
+from src.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 def encode_handler(event, context):
@@ -30,6 +33,8 @@ def encode_handler(event, context):
 
 
 def multiple_encode_handler(event, context):
+    logger.info("starting encode batch")
+
     body = event.get("body")
     if not body:
         return create_json_response(
@@ -54,9 +59,12 @@ def multiple_encode_handler(event, context):
         )
 
     sentences = data["sentences"]
-    result = encode_batch(sentences, batch_size=data["batch_size"])
+    batch_size = data["batch_size"]
+    result = encode_batch(sentences, batch_size=batch_size)
 
-    logging.info(
+    logger.debug("batch size=%s", batch_size)
+
+    logger.info(
         f"Input length: {len(sentences)}, number of encoded result: {len(result)} "
     )
     return create_json_response(
@@ -95,7 +103,6 @@ def cos_sim_weight_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any
     except Exception as e:
         return {"statusCode": 400, "body": json.dumps({"error": f"{e}"})}
 
-    # return {"statusCode":200, "body": json.dumps({"similarity":float(similarity)})}
     return create_json_response(
         status=200, data={"score": similarity_matrix.tolist()}, event=event
     )

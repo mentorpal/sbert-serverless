@@ -4,6 +4,8 @@ from src.functions.encode import (
     multiple_encode_handler,
 )
 from src.utils.encode import cos_sim_weight, encode, encode_batch
+
+
 import numpy as np
 import json
 
