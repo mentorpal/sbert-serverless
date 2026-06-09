@@ -73,6 +73,35 @@ functions:
           path: /ping
           method: get
           cors: true
+  paraphrase:
+    handler: src/functions/paraphrase.handler
+    timeout: 120
+    memorySize: 1024
+    events:
+      - http:
+          path: /paraphrase
+          method: post
+          cors: true
+  encode:
+    handler: src/functions/encode.encode_handler
+    timeout: 60
+    memorySize: 1024
+    events:
+      - http:
+          path: /encode
+          method: post
+          cors: true
+          
+  cosineSimilarityWeight:
+    handler: src/functions/encode.cos_sim_weight_handler
+    timeout: 30
+    memorySize: 1024
+    events:
+      - http:
+          path: /cos_sim_weight
+          method: get
+          cors: true
+
 
 resources:
   Conditions:
