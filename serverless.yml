@@ -5,7 +5,6 @@ service: mentorpal-sbert
 plugins:
   - serverless-offline
   - serverless-domain-manager
-  - serverless-layers
 custom:
   domain:
     dev: api-dev.mentorpal.org
@@ -21,6 +20,12 @@ custom:
     securityPolicy: tls_1_2
     autoDomain: true
     preserveExternalPathMappings: true
+  pythonRequirements:
+    layer: true               # Automatically converts requirements.txt into an isolated Layer
+    uvOnlyGroups:
+      - base
+    compatibleRuntimes:
+      - python3.12
   stages:
     offline:
       WEBACL_ARN: ${ssm:/shared-mentorpal/api_firewall_arn, ''}
@@ -31,21 +36,17 @@ custom:
     prod:
       WEBACL_ARN: ${ssm:/shared-mentorpal/api_firewall_arn, ''}
 
-#  serverless-layers requires a deployment bucket to be created before deploying this stack
-  serverless-layers:
-    - dependencies:
-        layersDeploymentBucket: ${self:provider.deploymentBucket.name}
-        dependenciesPath: ./requirements.txt
-        compatibleRuntimes:
-          - python3.12
-        functions:
-            - ping
-
 provider:
   name: aws
   runtime: python3.12
   region: us-east-1
   stage: ${opt:stage, 'offline'}
+  ecr:
+    images:
+      sbert:
+        path: ./
+        file: Dockerfile.sbert
+        platform: linux/amd64
   deploymentBucket:
     name: '${self:service}-sls-deploy-${self:provider.stage}-v2'
     blockPublicAccess: true
@@ -68,14 +69,19 @@ functions:
     handler: src/functions/ping.handler
     timeout: 30
     memorySize: 1024
+    layers:
+      - Ref: PythonRequirementsLambdaLayer
     events:
       - http:
           path: /ping
           method: get
           cors: true
   paraphrase:
-    handler: src/functions/paraphrase.handler
-    timeout: 120
+    image:
+      name: sbert
+      command:
+        - src.functions.paraphrase.paraphrase_mining_handler
+    timeout: 30
     memorySize: 1024
     events:
       - http:
@@ -83,8 +89,11 @@ functions:
           method: post
           cors: true
   encode:
-    handler: src/functions/encode.encode_handler
-    timeout: 60
+    image:
+      name: sbert
+      command:
+        - src.functions.encode.encode_handler
+    timeout: 30
     memorySize: 1024
     events:
       - http:
@@ -93,7 +102,10 @@ functions:
           cors: true
           
   cosineSimilarityWeight:
-    handler: src/functions/encode.cos_sim_weight_handler
+    image:
+      name: sbert
+      command:
+        - src.functions.encode.cos_sim_weight_handler
     timeout: 30
     memorySize: 1024
     events:
@@ -101,7 +113,6 @@ functions:
           path: /cos_sim_weight
           method: get
           cors: true
-
 
 resources:
   Conditions:

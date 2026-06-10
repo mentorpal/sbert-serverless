@@ -16,11 +16,17 @@ dependencies = [
 	"torch>=2.12.0",
 	"numpy>=2.4.6",
 	"openai>=2.41.0"
-
-
 ]
 
 [dependency-groups]
+base = [
+	"python-dotenv>=1.1.0",
+	"requests>=2.32.4",
+	"tqdm>=4.67.1",
+	"dataclass-wizard>=0.35.1",
+	"jsonschema>=4.26.0",
+]
+
 dev = [
 	"pytest-asyncio",
 	"pytest>=8.0.0",
