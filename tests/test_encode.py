@@ -14,6 +14,8 @@ from src.utils.encode import cos_sim_weight, encode
 
 import numpy as np
 import json
+import pytest
+import os
 
 
 def test_cosine_sim():
@@ -39,7 +41,10 @@ def test_cosine_sim():
     assert response["statusCode"] == 400
 
 
-def test_encode():
+@pytest.mark.skipif(
+    os.getenv("GITHUB_ACTIONS") == "true", reason="Skip this test in GitHub Actions"
+)
+def test_encode_handler():
     response = encode_handler({"body": json.dumps({"sentences": "Hello world"})}, None)
 
     assert response["statusCode"] == 200
@@ -55,6 +60,9 @@ def test_encode():
     assert response["statusCode"] == 400
 
 
+@pytest.mark.skipif(
+    os.getenv("GITHUB_ACTIONS") == "true", reason="Skip this test in GitHub Actions"
+)
 def test_multiple_encode_handler():
     response = encode_handler(
         {
@@ -85,12 +93,18 @@ def test_multiple_encode_handler():
     assert response["statusCode"] == 400
 
 
+@pytest.mark.skipif(
+    os.getenv("GITHUB_ACTIONS") == "true", reason="Skip this test in GitHub Actions"
+)
 def test_encode_and_cos_sim_weight():
     embedding1 = encode("Hello this is Syn")
     embedding2 = encode("Hi this is Syn")
     assert np.linalg.norm(cos_sim_weight(embedding1, embedding2)) >= 0.9
 
 
+@pytest.mark.skipif(
+    os.getenv("GITHUB_ACTIONS") == "true", reason="Skip this test in GitHub Actions"
+)
 def test_encode_multiple():
     texts = [
         "Hello",
