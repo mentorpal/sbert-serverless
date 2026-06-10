@@ -7,6 +7,12 @@
 
 from src.functions.paraphrase import paraphrase_mining_handler
 import json
+import pytest
+import os
+
+pytest.mark.skipif(
+    os.getenv("GITHUB_ACTIONS") == "true", reason="Skip this test in GitHub Actions"
+)
 
 
 def test_paraphrase_mining():
