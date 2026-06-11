@@ -28,13 +28,13 @@ custom:
       - python3.12
   stages:
     offline:
-      WEBACL_ARN: ${ssm:/shared-mentorpal/api_firewall_arn, ''}
+      WEBACL_ARN: ${ssm:/shared/api_firewall_arn, ''}
     dev:  #TODO: replace with dedicated gaima key
-      WEBACL_ARN: ${ssm:/shared-mentorpal/api_firewall_arn, ''}
+      WEBACL_ARN: ${ssm:/shared/api_firewall_arn, ''}
     qa:
-      WEBACL_ARN: ${ssm:/shared-mentorpal/api_firewall_arn, ''}
+      WEBACL_ARN: ${ssm:/shared/api_firewall_arn, ''}
     prod:
-      WEBACL_ARN: ${ssm:/shared-mentorpal/api_firewall_arn, ''}
+      WEBACL_ARN: ${ssm:/shared/api_firewall_arn, ''}
 
 provider:
   name: aws
@@ -54,6 +54,7 @@ provider:
     serverSideEncryption: AES256
     versioning: false
   environment:
+    OPENAI_API_KEY: ${ssm:/shared/openai_api_key, ''}
     NUMBA_CACHE_DIR: /tmp
     EASYOCR_MODULE_PATH: /tmp
     MODULE_PATH: /tmp
@@ -171,14 +172,14 @@ resources:
     # this fails on first deploy because CloudFormation tries to create
     # association but the gateway does not yet exist
     # Workaround: Disable this resource on first deploy, when first deploy is successful, enable this resource and deploy again
-    # FirewallAssociation:
-    #   Type: AWS::WAFv2::WebACLAssociation
-    #   Condition: AttachFirewall
-    #   DependsOn: 'ApiGatewayRestApi'
-    #   Properties:
-    #     ResourceArn:
-    #       Fn::Sub: 'arn:aws:apigateway:${AWS::Region}::/restapis/${ApiGatewayRestApi}/stages/${self:provider.stage}'
-    #     WebACLArn: '${self:custom.stages.${self:provider.stage}.WEBACL_ARN}'
+    FirewallAssociation:
+      Type: AWS::WAFv2::WebACLAssociation
+      Condition: AttachFirewall
+      DependsOn: 'ApiGatewayRestApi'
+      Properties:
+        ResourceArn:
+          Fn::Sub: 'arn:aws:apigateway:${AWS::Region}::/restapis/${ApiGatewayRestApi}/stages/${self:provider.stage}'
+        WebACLArn: '${self:custom.stages.${self:provider.stage}.WEBACL_ARN}'
 
     # configure cors for apigw error responses:
     Response5xx:
