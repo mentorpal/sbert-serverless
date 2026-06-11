@@ -47,6 +47,7 @@ provider:
         path: ./
         file: Dockerfile.sbert
         platform: linux/amd64
+        provenance: false
   deploymentBucket:
     name: '${self:service}-sls-deploy-${self:provider.stage}-v2'
     blockPublicAccess: true
