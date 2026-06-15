@@ -11,20 +11,20 @@ from openai import OpenAI
 
 def cos_sim_weight(a: list, b: list) -> np.ndarray:
 
-    a = np.array(a)
+    a_array = np.array(a)
 
-    b = np.array(b)
+    b_array = np.array(b)
 
-    if a.ndim == 1:
-        a = np.expand_dims(a, axis=0)
-    if b.ndim == 1:
-        b = np.expand_dims(b, axis=0)
+    if a_array.ndim == 1:
+        a_array = np.expand_dims(a_array, axis=0)
+    if b_array.ndim == 1:
+        b_array = np.expand_dims(b_array, axis=0)
 
     a_norms = np.linalg.norm(a, axis=1, keepdims=True)
     b_norms = np.linalg.norm(b, axis=1, keepdims=True)
 
     norm_product = a_norms @ b_norms.T
-    return a @ b.T / norm_product
+    return a_array @ b_array.T / norm_product
 
 
 def encode(sentences):
