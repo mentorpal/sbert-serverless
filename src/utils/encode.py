@@ -20,8 +20,8 @@ def cos_sim_weight(a: list, b: list) -> np.ndarray:
     if b_array.ndim == 1:
         b_array = np.expand_dims(b_array, axis=0)
 
-    a_norms = np.linalg.norm(a, axis=1, keepdims=True)
-    b_norms = np.linalg.norm(b, axis=1, keepdims=True)
+    a_norms = np.linalg.norm(a_array, axis=1, keepdims=True)
+    b_norms = np.linalg.norm(b_array, axis=1, keepdims=True)
 
     norm_product = a_norms @ b_norms.T
     return a_array @ b_array.T / norm_product
