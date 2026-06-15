@@ -40,6 +40,7 @@ def encode_handler(event, context):
 
 
 def cos_sim_weight_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
+
     body = event.get("body")
 
     if body is None:
@@ -61,8 +62,8 @@ def cos_sim_weight_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any
             status=400, data={"error": "Both a and b are required"}, event=event
         )
 
-    a = data["a"]
-    b = data["b"]
+    a: list = data["a"]
+    b: list = data["b"]
 
     try:
         similarity_matrix = cos_sim_weight(a, b)

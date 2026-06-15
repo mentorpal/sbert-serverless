@@ -115,7 +115,7 @@ functions:
     events:
       - http:
           path: /cos_sim_weight
-          method: get
+          method: post
           cors: true
 
 resources:
