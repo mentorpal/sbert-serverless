@@ -41,6 +41,8 @@ provider:
   runtime: python3.12
   region: us-east-1
   stage: ${opt:stage, 'offline'}
+  apiGateway:
+   timeoutInMillis: 179000
   ecr:
     images:
       sbert:
@@ -69,7 +71,7 @@ package:
 functions:
   ping:
     handler: src/functions/ping.handler
-    timeout: 30
+    timeout: 29
     memorySize: 1024
     layers:
       - Ref: PythonRequirementsLambdaLayer
@@ -83,7 +85,7 @@ functions:
       name: sbert
       command:
         - src.functions.paraphrase.paraphrase_mining_handler
-    timeout: 30
+    timeout: 179
     memorySize: 1024
     events:
       - http:
@@ -95,7 +97,7 @@ functions:
       name: sbert
       command:
         - src.functions.encode.encode_handler
-    timeout: 30
+    timeout: 179
     memorySize: 1024
     events:
       - http:
@@ -108,7 +110,7 @@ functions:
       name: sbert
       command:
         - src.functions.encode.cos_sim_weight_handler
-    timeout: 30
+    timeout: 179
     memorySize: 1024
     events:
       - http:
