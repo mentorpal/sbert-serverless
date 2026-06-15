@@ -125,8 +125,19 @@ def test_paraphrase_mining():
 
     assert response["statusCode"] == 200
 
+    texts = [
+        "The result is similar",
+    ]
+
     response = paraphrase_mining_handler(
-        {"body": json.dumps({"sentence": texts, "topk": 20})}, None
+        {"body": json.dumps({"sentence": texts, "topk": 10})}, None
     )
 
     assert response["statusCode"] == 200
+
+    response = paraphrase_mining_handler(
+        {"body": json.dumps({"sentence": "This is a string", "topk": 10})}, None
+    )
+
+    assert response["statusCode"] == 400
+    assert json.loads(response["body"])["data"]["error"] == "The input must be a list"

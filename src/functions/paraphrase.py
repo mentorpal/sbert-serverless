@@ -121,6 +121,12 @@ def paraphrase_mining_handler(event, context):
         )
 
     sentences = data["sentence"]
+
+    if not isinstance(sentences, List):
+        return create_json_response(
+            status=400, data={"error": "The input must be a list"}, event=event
+        )
+
     result = paraphrase_mining(sentences=sentences, top_k=data["topk"])
 
     return create_json_response(
