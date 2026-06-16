@@ -6,7 +6,7 @@
 #
 
 import json
-from typing import Dict, Any
+from typing import Dict, Any, List
 from src.utils.http_utils import create_json_response
 from src.utils.encode import cos_sim_weight, encode
 from src.utils.logger import get_logger
@@ -62,8 +62,8 @@ def cos_sim_weight_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any
             status=400, data={"error": "Both a and b are required"}, event=event
         )
 
-    a: list = data["a"]
-    b: list = data["b"]
+    a: List[List[float]] = data["a"]
+    b: List[List[float]] = data["b"]
 
     try:
         similarity_matrix = cos_sim_weight(a, b)
