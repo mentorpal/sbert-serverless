@@ -5,7 +5,6 @@ service: mentorpal-sbert
 plugins:
   - serverless-offline
   - serverless-domain-manager
-  - serverless-layers
 custom:
   domain:
     dev: api-dev.mentorpal.org
@@ -21,37 +20,43 @@ custom:
     securityPolicy: tls_1_2
     autoDomain: true
     preserveExternalPathMappings: true
+  pythonRequirements:
+    layer: true               # Automatically converts requirements.txt into an isolated Layer
+    uvOnlyGroups:
+      - base
+    compatibleRuntimes:
+      - python3.12
   stages:
     offline:
-      WEBACL_ARN: ${ssm:/shared-mentorpal/api_firewall_arn, ''}
+      WEBACL_ARN: ${ssm:/shared/api_firewall_arn, ''}
     dev:  #TODO: replace with dedicated gaima key
-      WEBACL_ARN: ${ssm:/shared-mentorpal/api_firewall_arn, ''}
+      WEBACL_ARN: ${ssm:/shared/api_firewall_arn, ''}
     qa:
-      WEBACL_ARN: ${ssm:/shared-mentorpal/api_firewall_arn, ''}
+      WEBACL_ARN: ${ssm:/shared/api_firewall_arn, ''}
     prod:
-      WEBACL_ARN: ${ssm:/shared-mentorpal/api_firewall_arn, ''}
-
-#  serverless-layers requires a deployment bucket to be created before deploying this stack
-  serverless-layers:
-    - dependencies:
-        layersDeploymentBucket: ${self:provider.deploymentBucket.name}
-        dependenciesPath: ./requirements.txt
-        compatibleRuntimes:
-          - python3.12
-        functions:
-            - ping
+      WEBACL_ARN: ${ssm:/shared/api_firewall_arn, ''}
 
 provider:
   name: aws
   runtime: python3.12
   region: us-east-1
   stage: ${opt:stage, 'offline'}
+  apiGateway:
+   timeoutInMillis: 179000
+  ecr:
+    images:
+      sbert:
+        path: ./
+        file: Dockerfile.sbert
+        platform: linux/amd64
+        provenance: false
   deploymentBucket:
     name: '${self:service}-sls-deploy-${self:provider.stage}-v2'
     blockPublicAccess: true
     serverSideEncryption: AES256
     versioning: false
   environment:
+    OPENAI_API_KEY: ${ssm:/shared/openai_api_key, ''}
     NUMBA_CACHE_DIR: /tmp
     EASYOCR_MODULE_PATH: /tmp
     MODULE_PATH: /tmp
@@ -66,12 +71,51 @@ package:
 functions:
   ping:
     handler: src/functions/ping.handler
-    timeout: 30
+    timeout: 29
     memorySize: 1024
+    layers:
+      - Ref: PythonRequirementsLambdaLayer
     events:
       - http:
           path: /ping
           method: get
+          cors: true
+  paraphrase:
+    image:
+      name: sbert
+      command:
+        - src.functions.paraphrase.paraphrase_mining_handler
+    timeout: 179
+    memorySize: 1024
+    events:
+      - http:
+          path: /paraphrase
+          method: post
+          cors: true
+  encode:
+    image:
+      name: sbert
+      command:
+        - src.functions.encode.encode_handler
+    timeout: 179
+    memorySize: 1024
+    events:
+      - http:
+          path: /encode
+          method: post
+          cors: true
+          
+  cosineSimilarityWeight:
+    image:
+      name: sbert
+      command:
+        - src.functions.encode.cos_sim_weight_handler
+    timeout: 179
+    memorySize: 1024
+    events:
+      - http:
+          path: /cos_sim_weight
+          method: post
           cors: true
 
 resources:
@@ -130,14 +174,14 @@ resources:
     # this fails on first deploy because CloudFormation tries to create
     # association but the gateway does not yet exist
     # Workaround: Disable this resource on first deploy, when first deploy is successful, enable this resource and deploy again
-    # FirewallAssociation:
-    #   Type: AWS::WAFv2::WebACLAssociation
-    #   Condition: AttachFirewall
-    #   DependsOn: 'ApiGatewayRestApi'
-    #   Properties:
-    #     ResourceArn:
-    #       Fn::Sub: 'arn:aws:apigateway:${AWS::Region}::/restapis/${ApiGatewayRestApi}/stages/${self:provider.stage}'
-    #     WebACLArn: '${self:custom.stages.${self:provider.stage}.WEBACL_ARN}'
+    FirewallAssociation:
+      Type: AWS::WAFv2::WebACLAssociation
+      Condition: AttachFirewall
+      DependsOn: 'ApiGatewayRestApi'
+      Properties:
+        ResourceArn:
+          Fn::Sub: 'arn:aws:apigateway:${AWS::Region}::/restapis/${ApiGatewayRestApi}/stages/${self:provider.stage}'
+        WebACLArn: '${self:custom.stages.${self:provider.stage}.WEBACL_ARN}'
 
     # configure cors for apigw error responses:
     Response5xx:
