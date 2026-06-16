@@ -6,10 +6,11 @@
 #
 
 import numpy as np
+from typing import List
 from openai import OpenAI
 
 
-def cos_sim_weight(a: list, b: list) -> np.ndarray:
+def cos_sim_weight(a: List[List[float]], b: List[List[float]]) -> np.ndarray:
 
     a_array = np.array(a)
 
